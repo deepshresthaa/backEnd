@@ -1,15 +1,41 @@
-{{>header}}
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home - Register & Login</title>
+  <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
-    <a href="/registration">Register</a>
-    <a href="/login">Login</a>
+<body>  <div class="container">
+    <div class="form-container">
+      <h1>Welcome!</h1>
+      <p>Join us or log in to connect with friends and the world around you.</p>
+      
+      <div class="tabs">
+        <button class="tab active" id="login-tab">Login</button>
+        <button class="tab" id="register-tab">Register</button>
+      </div>
+      
+      <!-- Login Form -->
+      <form id="login-form" class="form active" action="/login" method="POST">
+        <input type="email" name="email" placeholder="Email" required>
+        <input type="password" name="password" placeholder="Password" required>
+        <input type="submit" value="Login">
+        <p class="switch-text">Don't have an account? <span id="switch-to-register">Register</span></p>
+      </form>
+      
+      <!-- Register Form -->
+      <form id="register-form" class="form" action="/registration" method="POST">
+        <input type="text" placeholder="Username" name="username" required>
+        <input type="email" placeholder="Email" name="email" required>
+        <input type="password" placeholder="Password" name="password" required>
+        <input type="submit" value="Register">
+        <p class="switch-text">Already have an account? <span id="switch-to-login">Login</span></p>
+      </form>
+    </div>
+  </div>
+  
+  <script src="js/script.js"></script>
 </body>
 </html>
-{{>footer}}

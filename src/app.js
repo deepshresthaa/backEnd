@@ -133,6 +133,7 @@ app.get("/registration",(req,res)=>{
 app.post("/registration",async ( req,res)=>{
     try{
         const data=req.body;
+        console.log(data);
         const username=data.username;
         const email=data.email;
         const userVal=await User.find({username});
@@ -192,8 +193,10 @@ app.post("/login",async ( req,res)=>{
     // console.log(req.body)
     // res.send(req.body);
     const data=req.body;
+    console.log(data)
     //check if email exist already in database or not, if exist check password , if both correct show their dashboard
     const checkEmail=await User.find({email:data.email});
+    console.log(checkEmail)
     if(checkEmail.length){
         console.log("email chai milyo hai !");
         // res.send("email chai milyo hai!!")
@@ -203,7 +206,6 @@ app.post("/login",async ( req,res)=>{
 
         // console.log(checkEmail)
         // console.log(checkEmail[0].password);
-
         const checkPassword=await bcrypt.compare(data.password,checkEmail[0].password);
         console.log(checkPassword);
 
