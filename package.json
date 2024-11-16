@@ -4,14 +4,15 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start":"node src/app.js",
-    "dev":"nodemon src/app.js -e hbs,js,html,css"
+    "start": "node src/app.js",
+    "dev": "nodemon src/app.js -e hbs,js,html,css"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "express": "^4.21.1",
     "hbs": "^4.2.0",
     "mongoose": "^8.8.1",

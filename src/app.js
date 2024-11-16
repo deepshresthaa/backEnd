@@ -3,7 +3,7 @@ require("./db/connection");
 const User=require("./models/user");
 const hbs=require("hbs");
 const path=require("path");
-
+const bcrypt=require("bcryptjs")
 
 const app=express();
 const port=process.env.PORT || 4001;
@@ -154,6 +154,14 @@ app.post("/registration",async ( req,res)=>{
         }
         else{
             const newUser=new User(data);
+            
+
+            // //bcrypt
+            // console.log(newUser);
+            // console.log(bcrypt.hash(data.password));
+            // // newUser.password=bcrypt.hash(data.password);
+
+
             await newUser.save();
             res.status(201).send(`Hi, ${data.username}!. Welcome to quizy suizy!`)
 
@@ -196,7 +204,10 @@ app.post("/login",async ( req,res)=>{
         // console.log(checkEmail)
         // console.log(checkEmail[0].password);
 
-        if(data.password===checkEmail[0].password){
+        const checkPassword=await bcrypt.compare(data.password,checkEmail[0].password);
+        console.log(checkPassword);
+
+        if(checkPassword){
 
             console.log("Login successful!✅✅");
             res.send(`Welcome ${checkEmail[0].username}!, To you quiz dashboard!🏆`)
