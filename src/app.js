@@ -3,19 +3,24 @@ require("./db/connection");
 const User=require("./models/user");
 const hbs=require("hbs");
 const path=require("path");
-const bcrypt=require("bcryptjs")
+const bcrypt=require("bcryptjs");
+// const { default: isEmail } = require("validator/lib/isEmail");
+const jwt=require("jsonwebtoken");
+const { default: isEmail } = require("validator/lib/isEmail");
+const auth=require("./middleware/auth");
+const cookie=require("cookie-parser")
 
 const app=express();
-const port=process.env.PORT || 4001;
+const port=process.env.PORT || 4002;
 app.use(express.json())
 app.use(express.urlencoded({extended:false}));
-
-const static_dir=path.join(__dirname,"../public");
+app.use(cookie());
+// const static_dir=path.join(process.);
 const views_path=path.join(__dirname,"./templates/views");
 const partials_path=path.join(__dirname,"./templates/partials");
 
 
-app.use(express.static(static_dir));
+app.use(express.static(process.env.STATIC_DIRECTORY));
 
 
 //for template engine
@@ -85,6 +90,7 @@ app.get("/users/:email",async(req,res)=>{
 //patch request
 
 
+
 app.patch("/users/:id",async (req,res)=>{
     const id=req.params.id;
     const newEmail=await req.body.email;
@@ -136,8 +142,8 @@ app.post("/registration",async ( req,res)=>{
         console.log(data);
         const username=data.username;
         const email=data.email;
-        const userVal=await User.find({username});
-        const emailVal=await User.find({email});
+        // const userVal=await User.find({username});
+        // const emailVal=await User.find({email});
         // console.log(Boolean(userVal))
         // console.log(Boolean(emailVal));
 
@@ -145,23 +151,27 @@ app.post("/registration",async ( req,res)=>{
 
         // console.log(userVal.length)
         // console.log(emailVal.length);
-        if(userVal.length){
+        if(await User.findOne({username})){
             // const newUser=new User(req.body);
             // await newUser.save()
             res.send("User with this username already exists!");
         }
-        else if(emailVal.length){
+        else if(await User.findOne({email})){
             res.send("User with this email already exists!")
         }
         else{
             const newUser=new User(data);
             
+            //jwt adding
+            const token=await newUser.generatejwt();
+            console.log("the token part is : " ,token);
 
-            // //bcrypt
-            // console.log(newUser);
-            // console.log(bcrypt.hash(data.password));
-            // // newUser.password=bcrypt.hash(data.password);
-
+            res.cookie("authToken",token,{
+                expires:new Date(Date.now()+300000),
+                httpOnly:true
+            });
+            // console.log(cookie);
+            // console.log(req.cookies.jwt)
 
             await newUser.save();
             res.status(201).send(`Hi, ${data.username}!. Welcome to quizy suizy!`)
@@ -189,15 +199,15 @@ app.get("/login",(req,res)=>{
 })
 
 //login post
-app.post("/login",async ( req,res)=>{
+app.post("/login", async ( req,res)=>{
     // console.log(req.body)
     // res.send(req.body);
     const data=req.body;
     console.log(data)
     //check if email exist already in database or not, if exist check password , if both correct show their dashboard
-    const checkEmail=await User.find({email:data.email});
+    const checkEmail=await User.findOne({email:data.email});
     console.log(checkEmail)
-    if(checkEmail.length){
+    if(checkEmail){
         console.log("email chai milyo hai !");
         // res.send("email chai milyo hai!!")
         //email pahilai register vaisakeko vetiyesi
@@ -206,13 +216,24 @@ app.post("/login",async ( req,res)=>{
 
         // console.log(checkEmail)
         // console.log(checkEmail[0].password);
-        const checkPassword=await bcrypt.compare(data.password,checkEmail[0].password);
-        console.log(checkPassword);
+        const checkPassword=await bcrypt.compare(data.password,checkEmail.password);
+        // console.log(checkPassword);
 
+        const token=await checkEmail.generatejwt();
+        res.cookie("authToken",token,{
+            expires:new Date(Date.now()+30000),
+            httpOnly:true
+        })
+        // res.send(res.cookie)
+        // console.log(res.cookie);
         if(checkPassword){
 
+            console.log(checkEmail.tokens[0].token)
             console.log("Login successful!✅✅");
-            res.send(`Welcome ${checkEmail[0].username}!, To you quiz dashboard!🏆`)
+            res.send(`Welcome ${checkEmail.username}!, To you quiz dashboard!🏆 </form>
+      <form action="/secret" method="GET">
+        <input type="submit" value="Secret">
+      </form>`)
 
         }else{
             res.send("Incorrect password!❌");
@@ -227,6 +248,17 @@ app.post("/login",async ( req,res)=>{
 
     //if username is unique
 
+});
+
+
+
+
+
+//testing
+
+
+app.get("/secret",auth,(req,res)=>{
+    res.send("Genuine user!!!");
 })
 
 //server listening
